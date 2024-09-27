@@ -9,17 +9,18 @@
             font-family: Arial, sans-serif;
             background-color: #f2f2f2;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
         }
         h2 {
             text-align: center;
             color: #333;
+            font-size: 1.5em;
         }
         form {
-            max-width: 600px;
+            max-width: 100%;
             margin: auto;
             background: #fff;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
@@ -28,54 +29,82 @@
             font-weight: bold;
             display: block;
             margin-top: 15px;
+            font-size: 1em;
         }
         input, textarea, select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-top: 5px;
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
             text-transform: uppercase; /* Visual uppercase */
+            font-size: 1em;
         }
-        .produto-header, .produto-item {
+        /* Remoção dos labels para os produtos */
+        .produto-header {
+            display: none;
+        }
+        .produto-item {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ccc; /* Linha separadora */
+            flex-wrap: wrap;
+            position: relative; /* Para posicionamento das sugestões */
         }
-        .produto-header label {
+        /* Ajustes para os campos dentro do produto-item */
+        .produto-item input[type="number"] {
+            flex: 0 0 60px;
+            /* Removido o atributo min */
+        }
+        .produto-item .autocomplete {
             flex: 1;
-            margin-top: 0;
+            position: relative;
         }
-        .produto-header label:nth-child(1) {
-            text-align: left;
-            margin-left: 5px; /* Move pixels para a direita */
-        }
-        .produto-header label:nth-child(2) {
-            text-align: center;
-        }
-        .produto-header label:nth-child(3) {
-            text-align: right;
-            margin-right: 50px; /* Move pixels para a esquerda */
-        }
-        .produto-item input[type="number"],
-        .produto-item input[type="text"] {
-            flex: 1;
-        }
-        .produto-item input[name="quantidade"] {
-            max-width: 70px;
+        .produto-item input[name="descricao"] {
+            width: 100%;
         }
         .produto-item input[name="valor"] {
-            max-width: 100px;
+            flex: 0 0 100px;
+            /* Removido o atributo min */
         }
+        /* Estilos para o autocomplete */
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #fff;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .autocomplete-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .autocomplete-item:hover {
+            background-color: #e9e9e9;
+        }
+        /* Botão Remover estilizado */
         .remover-produto {
             background-color: #dc3545;
             color: #fff;
-            padding: 5px 10px;
+            width: 30px;
+            height: 30px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
         }
         .remover-produto:hover {
             background-color: #c82333;
@@ -83,12 +112,13 @@
         #adicionar-produto {
             background-color: #28a745;
             color: #fff;
-            padding: 10px 15px;
+            padding: 12px 15px;
             margin-top: 10px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             width: 100%;
+            font-size: 1em;
         }
         #adicionar-produto:hover {
             background-color: #218838;
@@ -101,7 +131,7 @@
             width: 100%;
             border: none;
             border-radius: 4px;
-            font-size: 16px;
+            font-size: 1.2em;
             cursor: pointer;
         }
         #enviar:hover {
@@ -122,16 +152,40 @@
         }
         /* Responsividade */
         @media (max-width: 600px) {
-            .produto-header, .produto-item {
-                flex-direction: column;
-                align-items: stretch;
+            body {
+                padding: 5px;
             }
-            .produto-header label {
+            h2 {
+                font-size: 1.2em;
+            }
+            label {
+                font-size: 0.9em;
+            }
+            input, textarea, select {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            .produto-item {
+                flex-direction: row;
+                align-items: center;
+                width: 100%;
+            }
+            .remover-produto {
+                width: 30px;
+                height: 30px;
+                margin-left: 10px;
+            }
+            #total {
                 text-align: left;
+                font-size: 1.2em;
             }
-            .produto-item input[type="number"],
-            .produto-item input[type="text"] {
-                max-width: none;
+            #enviar {
+                font-size: 1em;
+                padding: 12px;
+            }
+            #adicionar-produto {
+                font-size: 1em;
+                padding: 12px;
             }
         }
     </style>
@@ -151,25 +205,13 @@
 
     <div id="produtos">
         <h3>Lista de Produtos</h3>
-        <div class="produto-header">
-            <label>Quantidade                </label>
-            <label>Descrição</label>
-            <label>Valor Unitário</label>
-            
-        </div>
+        <!-- Removido o header dos produtos -->
         <div class="produto-item">
-            <input type="number" name="quantidade" placeholder="Qtd" min="1" required>
-            <input type="text" name="descricao" placeholder="Descrição" list="lista-produtos" required>
-            <datalist id="lista-produtos">
-                <option value="CARRAPINHA">
-                <option value="COCADA BRANCA">
-                <option value="COCADA COM LEITE CONDENSADO">
-                <option value="PAÇOCA">
-                <option value="PAÇOCA DE CHOLATATE">
-                <option value="PÉ DE MOLEQUE">
-                <option value="RAPADURA LEITE">
-                <option value="RAPADURA LEITE NINHO">
-            </datalist>
+            <input type="number" name="quantidade" placeholder="Qtd" required>
+            <div class="autocomplete">
+                <input type="text" name="descricao" placeholder="Descrição" required>
+                <div class="autocomplete-items"></div>
+            </div>
             <input type="text" name="valor" placeholder="Valor (R$)" required>
             <button type="button" class="remover-produto">X</button>
         </div>
@@ -193,6 +235,18 @@
 </form>
 
 <script>
+    // Lista de produtos para autocomplete
+    const produtosDisponiveis = [
+        "CARRAPINHA",
+        "COCADA BRANCA",
+        "COCADA COM LEITE CONDENSADO",
+        "PAÇOCA",
+        "PAÇOCA DE CHOCOLATE",
+        "PÉ DE MOLEQUE",
+        "RAPADURA LEITE",
+        "RAPADURA LEITE NINHO"
+    ];
+
     // Função para formatar números com vírgula como separador decimal
     function formatNumber(num) {
         return num.toFixed(2).replace('.', ',');
@@ -211,18 +265,18 @@
             return false;
 
         // Valida DVs
-        let tamanho = cnpj.length - 2
+        let tamanho = cnpj.length - 2;
         let numeros = cnpj.substring(0, tamanho);
         let digitos = cnpj.substring(tamanho);
         let soma = 0;
         let pos = tamanho - 7;
         for (let i = tamanho; i >= 1; i--) {
-            soma += numeros.charAt(tamanho - i) * pos--;
+            soma += parseInt(numeros.charAt(tamanho - i)) * pos--;
             if (pos < 2)
                 pos = 9;
         }
-        let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
-        if (resultado != digitos.charAt(0))
+        let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+        if (resultado !== parseInt(digitos.charAt(0)))
             return false;
 
         tamanho = tamanho + 1;
@@ -230,12 +284,12 @@
         soma = 0;
         pos = tamanho - 7;
         for (let i = tamanho; i >= 1; i--) {
-            soma += numeros.charAt(tamanho - i) * pos--;
+            soma += parseInt(numeros.charAt(tamanho - i)) * pos--;
             if (pos < 2)
                 pos = 9;
         }
-        resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
-        if (resultado != digitos.charAt(1))
+        resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+        if (resultado !== parseInt(digitos.charAt(1)))
             return false;
 
         return true;
@@ -314,20 +368,112 @@
         return totalNota;
     }
 
+    // Função para criar o autocomplete
+    function criarAutocomplete(inp, arr) {
+        closeAllLists(inp);
+        const autocompleteDiv = inp.parentNode.querySelector('.autocomplete-items');
+        if (!autocompleteDiv) return;
+
+        const val = inp.value.toUpperCase();
+        let filteredArr = [];
+
+        if (val) {
+            filteredArr = arr.filter(item => item.toUpperCase().includes(val));
+        } else {
+            // Se o campo estiver vazio, mostrar todas as opções
+            filteredArr = arr.slice();
+        }
+
+        const maxSuggestions = 5;
+        let count = 0;
+
+        filteredArr.forEach(item => {
+            if (count >= maxSuggestions) return;
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('autocomplete-item');
+            if (val) {
+                // Destaque da parte correspondente
+                const startIndex = item.toUpperCase().indexOf(val);
+                if (startIndex !== -1) {
+                    const endIndex = startIndex + val.length;
+                    itemDiv.innerHTML = 
+                        item.substring(0, startIndex) +
+                        "<strong>" + item.substring(startIndex, endIndex) + "</strong>" +
+                        item.substring(endIndex);
+                } else {
+                    itemDiv.textContent = item;
+                }
+            } else {
+                itemDiv.textContent = item;
+            }
+            // Evento de clique na sugestão
+            itemDiv.addEventListener('click', function() {
+                inp.value = item;
+                closeAllLists(inp);
+                recalcularTotal();
+            });
+            autocompleteDiv.appendChild(itemDiv);
+            count++;
+        });
+
+        if (filteredArr.length === 0) {
+            const noMatchDiv = document.createElement('div');
+            noMatchDiv.classList.add('autocomplete-item');
+            noMatchDiv.innerHTML = "Nenhum resultado encontrado";
+            autocompleteDiv.appendChild(noMatchDiv);
+        }
+    }
+
+    // Função para fechar todas as listas de autocomplete
+    function closeAllLists(element) {
+        const items = document.getElementsByClassName('autocomplete-items');
+        for (let i = 0; i < items.length; i++) {
+            if (element !== items[i] && element !== element.parentNode.querySelector('.autocomplete-items')) {
+                items[i].innerHTML = '';
+            }
+        }
+    }
+
     // Função para adicionar event listeners aos inputs
     function adicionarListenersProduto(produtoDiv) {
-        const inputs = produtoDiv.querySelectorAll('input');
-        inputs.forEach(input => {
+        const quantidadeInput = produtoDiv.querySelector('input[name="quantidade"]');
+        const descricaoInput = produtoDiv.querySelector('input[name="descricao"]');
+        const valorInput = produtoDiv.querySelector('input[name="valor"]');
+        const removerBtn = produtoDiv.querySelector('.remover-produto');
+
+        // Uppercase para o campo descrição e configuração do autocomplete
+        descricaoInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+            criarAutocomplete(this, produtosDisponiveis);
+            recalcularTotal();
+        });
+
+        // Evento para exibir autocomplete ao focar no campo
+        descricaoInput.addEventListener('focus', function() {
+            criarAutocomplete(this, produtosDisponiveis);
+        });
+
+        // Evento para exibir autocomplete ao clicar no campo (para dispositivos móveis)
+        descricaoInput.addEventListener('click', function() {
+            criarAutocomplete(this, produtosDisponiveis);
+        });
+
+        // Evento para limpar autocomplete ao sair do campo
+        descricaoInput.addEventListener('blur', function() {
+            // Pequeno delay para permitir o clique nas sugestões
+            setTimeout(() => {
+                closeAllLists(this);
+            }, 100);
+        });
+
+        // Uppercase para os outros campos e recalcula o total
+        [quantidadeInput, valorInput].forEach(input => {
             input.addEventListener('input', function() {
-                if (input.name !== 'valor' && input.name !== 'quantidade') {
-                    this.value = this.value.toUpperCase(); // Converter para maiúsculas
-                }
                 recalcularTotal();
             });
         });
 
         // Event listener para o botão de remover produto
-        const removerBtn = produtoDiv.querySelector('.remover-produto');
         removerBtn.addEventListener('click', function() {
             produtoDiv.remove();
             recalcularTotal();
@@ -344,8 +490,11 @@
         const novoProduto = document.createElement('div');
         novoProduto.className = 'produto-item';
         novoProduto.innerHTML = `
-            <input type="number" name="quantidade" placeholder="Qtd" min="1" required>
-            <input type="text" name="descricao" placeholder="Descrição" list="lista-produtos" required>
+            <input type="number" name="quantidade" placeholder="Qtd" required>
+            <div class="autocomplete">
+                <input type="text" name="descricao" placeholder="Descrição" required>
+                <div class="autocomplete-items"></div>
+            </div>
             <input type="text" name="valor" placeholder="Valor (R$)" required>
             <button type="button" class="remover-produto">X</button>
         `;
@@ -355,6 +504,11 @@
 
         // Adicionar listeners para o novo produto
         adicionarListenersProduto(novoProduto);
+    });
+
+    // Event listener para fechar a lista de autocomplete quando clicar fora
+    document.addEventListener('click', function (e) {
+        closeAllLists(e.target);
     });
 
     // Event listener para enviar via WhatsApp

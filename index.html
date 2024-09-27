@@ -24,9 +24,10 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         label {
+            color: #555;
+            font-weight: bold;
             display: block;
             margin-top: 15px;
-            color: #555;
         }
         input, textarea, select {
             width: 100%;
@@ -35,16 +36,49 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
+            text-transform: uppercase; /* Visual uppercase */
         }
-        .produto-item {
+        .produto-header, .produto-item {
             display: flex;
-            flex-wrap: wrap;
+            align-items: center;
             gap: 10px;
             margin-bottom: 10px;
         }
+        .produto-header label {
+            flex: 1;
+            margin-top: 0;
+        }
+        .produto-header label:nth-child(1) {
+            text-align: left;
+            margin-left: 5px; /* Move pixels para a direita */
+        }
+        .produto-header label:nth-child(2) {
+            text-align: center;
+        }
+        .produto-header label:nth-child(3) {
+            text-align: right;
+            margin-right: 50px; /* Move pixels para a esquerda */
+        }
         .produto-item input[type="number"],
         .produto-item input[type="text"] {
-            flex: 1 1 30%;
+            flex: 1;
+        }
+        .produto-item input[name="quantidade"] {
+            max-width: 70px;
+        }
+        .produto-item input[name="valor"] {
+            max-width: 100px;
+        }
+        .remover-produto {
+            background-color: #dc3545;
+            color: #fff;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .remover-produto:hover {
+            background-color: #c82333;
         }
         #adicionar-produto {
             background-color: #28a745;
@@ -88,16 +122,21 @@
         }
         /* Responsividade */
         @media (max-width: 600px) {
-            .produto-item {
+            .produto-header, .produto-item {
                 flex-direction: column;
+                align-items: stretch;
+            }
+            .produto-header label {
+                text-align: left;
             }
             .produto-item input[type="number"],
             .produto-item input[type="text"] {
-                flex: 1 1 100%;
+                max-width: none;
             }
         }
     </style>
 </head>
+
 <body>
 
 <h2>Formulário para Emissão de Nota Fiscal</h2>
@@ -110,17 +149,29 @@
     <label for="empresa">Nome da Empresa Compradora:</label>
     <input type="text" id="empresa" name="empresa" required placeholder="Nome da Empresa">
 
-    <!-- Campo de endereço removido ou opcional -->
-    <!-- <label for="endereco">Endereço da Empresa Compradora:</label>
-    <input type="text" id="endereco" name="endereco"> -->
-
     <div id="produtos">
         <h3>Lista de Produtos</h3>
+        <div class="produto-header">
+            <label>Quantidade                </label>
+            <label>Descrição</label>
+            <label>Valor Unitário</label>
+            
+        </div>
         <div class="produto-item">
-            <!-- Ajuste nos campos dos produtos -->
-            <input type="number" name="quantidade" placeholder="Quantidade" min="1" required>
-            <input type="text" name="descricao" placeholder="Descrição do Produto" required>
-            <input type="text" name="valor" placeholder="Valor Unitário (R$)" required>
+            <input type="number" name="quantidade" placeholder="Qtd" min="1" required>
+            <input type="text" name="descricao" placeholder="Descrição" list="lista-produtos" required>
+            <datalist id="lista-produtos">
+                <option value="CARRAPINHA">
+                <option value="COCADA BRANCA">
+                <option value="COCADA COM LEITE CONDENSADO">
+                <option value="PAÇOCA">
+                <option value="PAÇOCA DE CHOLATATE">
+                <option value="PÉ DE MOLEQUE">
+                <option value="RAPADURA LEITE">
+                <option value="RAPADURA LEITE NINHO">
+            </datalist>
+            <input type="text" name="valor" placeholder="Valor (R$)" required>
+            <button type="button" class="remover-produto">X</button>
         </div>
     </div>
     <button type="button" id="adicionar-produto">Adicionar Produto</button>
@@ -130,12 +181,12 @@
     <label for="pagamento">Forma de Pagamento:</label>
     <select id="pagamento" name="pagamento" required>
         <option value="">Selecione</option>
-        <option value="Dinheiro">Dinheiro</option>
-        <option value="Cartão de Crédito">Cartão de Crédito</option>
-        <option value="Cartão de Débito">Cartão de Débito</option>
-        <option value="Pix">Pix</option>
-        <option value="Boleto">Boleto</option>
-        <option value="Transferência Bancária">Transferência Bancária</option>
+        <option value="DINHEIRO">Dinheiro</option>
+        <option value="CARTÃO DE CRÉDITO">Cartão de Crédito</option>
+        <option value="CARTÃO DE DÉBITO">Cartão de Débito</option>
+        <option value="PIX">Pix</option>
+        <option value="BOLETO">Boleto</option>
+        <option value="TRANSFERÊNCIA BANCÁRIA">Transferência Bancária</option>
     </select>
 
     <button type="button" id="enviar">Enviar via WhatsApp</button>
@@ -155,7 +206,7 @@
         if (cnpj.length !== 14)
             return false;
 
-        // Elimina CNPJs invalidos conhecidos
+        // Elimina CNPJs inválidos conhecidos
         if (/^(\d)\1+$/.test(cnpj))
             return false;
 
@@ -214,7 +265,7 @@
             const parsedData = JSON.parse(data.contents);
 
             if (parsedData.status === 'OK') {
-                document.getElementById('empresa').value = parsedData.nome;
+                document.getElementById('empresa').value = parsedData.nome.toUpperCase();
                 // Se desejar, preencha outros campos como endereço aqui
             } else {
                 exibirErro('cnpj-error', 'CNPJ não encontrado ou inválido. Por favor, preencha o nome da empresa manualmente.');
@@ -263,11 +314,23 @@
         return totalNota;
     }
 
-    // Adicionar event listeners para recalcular o total quando os campos forem alterados
+    // Função para adicionar event listeners aos inputs
     function adicionarListenersProduto(produtoDiv) {
         const inputs = produtoDiv.querySelectorAll('input');
         inputs.forEach(input => {
-            input.addEventListener('input', recalcularTotal);
+            input.addEventListener('input', function() {
+                if (input.name !== 'valor' && input.name !== 'quantidade') {
+                    this.value = this.value.toUpperCase(); // Converter para maiúsculas
+                }
+                recalcularTotal();
+            });
+        });
+
+        // Event listener para o botão de remover produto
+        const removerBtn = produtoDiv.querySelector('.remover-produto');
+        removerBtn.addEventListener('click', function() {
+            produtoDiv.remove();
+            recalcularTotal();
         });
     }
 
@@ -281,9 +344,10 @@
         const novoProduto = document.createElement('div');
         novoProduto.className = 'produto-item';
         novoProduto.innerHTML = `
-            <input type="number" name="quantidade" placeholder="Quantidade" min="1" required>
-            <input type="text" name="descricao" placeholder="Descrição do Produto" required>
-            <input type="text" name="valor" placeholder="Valor Unitário (R$)" required>
+            <input type="number" name="quantidade" placeholder="Qtd" min="1" required>
+            <input type="text" name="descricao" placeholder="Descrição" list="lista-produtos" required>
+            <input type="text" name="valor" placeholder="Valor (R$)" required>
+            <button type="button" class="remover-produto">X</button>
         `;
         produtosDiv.appendChild(novoProduto);
         // Focar no campo de quantidade do novo produto
@@ -316,7 +380,7 @@
         const produtoItens = document.getElementsByClassName('produto-item');
         for (let i = 0; i < produtoItens.length; i++) {
             const quantidade = parseFloat(produtoItens[i].querySelector('input[name="quantidade"]').value) || 0;
-            const descricao = produtoItens[i].querySelector('input[name="descricao"]').value.trim();
+            const descricao = produtoItens[i].querySelector('input[name="descricao"]').value.trim().toUpperCase();
             let valorInput = produtoItens[i].querySelector('input[name="valor"]').value.replace(',', '.');
             const valor = parseFloat(valorInput) || 0;
             const subtotal = quantidade * valor;
@@ -327,7 +391,7 @@
         const totalNotaFormatado = formatNumber(totalNota);
 
         const mensagem = `*DADOS DO COMPRADOR:*
-Empresa: ${empresa}
+Empresa: ${empresa.toUpperCase()}
 CNPJ: ${cnpj}
 
 *LISTA DE PRODUTOS:*

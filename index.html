@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pedido de Nota Fiscal</title>
     <style>
         * {
@@ -312,28 +312,37 @@
     </div>
 
     <div class="form-content">
+        <div class="section">
+            <div class="section-title" id="tipo-nota-titulo">Selecione o tipo de nota</div>
+            <div class="toggle-buttons" role="group" aria-labelledby="tipo-nota-titulo">
+                <button type="button" class="toggle-btn" data-nota="nfa" aria-pressed="false" onclick="selecionarNota('nfa')">📦 NFA — Produtos</button>
+                <button type="button" class="toggle-btn" data-nota="nfs" aria-pressed="false" onclick="selecionarNota('nfs')">🛠️ NFS — Serviços</button>
+            </div>
+        </div>
+
+        <div id="dados-nota" class="hidden">
         <!-- Seção Tipo de Cliente -->
         <div class="section">
-            <div class="section-title">Tipo de Cliente</div>
+            <div class="section-title" id="titulo-cliente">Tipo de Cliente</div>
             <div class="toggle-buttons">
-                <div class="toggle-btn active" onclick="selecionarTipo('cnpj')">
+                <button type="button" class="toggle-btn active" data-cliente="cnpj" aria-pressed="true" onclick="selecionarTipo('cnpj')">
                     🏢 Empresa (CNPJ)
-                </div>
-                <div class="toggle-btn" onclick="selecionarTipo('cpf')">
+                </button>
+                <button type="button" class="toggle-btn" data-cliente="cpf" aria-pressed="false" onclick="selecionarTipo('cpf')">
                     👤 Pessoa Física (CPF)
-                </div>
+                </button>
             </div>
         </div>
 
         <!-- Dados CNPJ -->
         <div id="dados-cnpj" class="section">
             <div class="input-group">
-                <label class="required">CNPJ</label>
+                <label class="required" for="cnpj">CNPJ</label>
                 <input type="text" id="cnpj" placeholder="00.000.000/0000-00" maxlength="18">
                 <span id="cnpj-error" class="error"></span>
             </div>
             <div class="input-group">
-                <label class="required">Razão Social</label>
+                <label class="required" for="razao-social">Razão Social</label>
                 <input type="text" id="razao-social" placeholder="Nome da empresa">
             </div>
         </div>
@@ -341,55 +350,55 @@
         <!-- Dados CPF -->
         <div id="dados-cpf" class="section hidden">
             <div class="input-group">
-                <label class="required">CPF</label>
+                <label class="required" for="cpf">CPF</label>
                 <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14">
                 <span id="cpf-error" class="error"></span>
             </div>
             <div class="input-group">
-                <label class="required">Nome Completo</label>
+                <label class="required" for="nome-completo">Nome Completo</label>
                 <input type="text" id="nome-completo" placeholder="Digite seu nome completo">
             </div>
             <div class="input-group">
-                <label class="required">CEP</label>
+                <label class="required" for="cep">CEP</label>
                 <input type="text" id="cep" placeholder="00000-000" maxlength="9">
                 <span id="cep-error" class="error"></span>
             </div>
             <div class="input-group">
-                <label class="required">Endereço</label>
+                <label class="required" for="endereco">Endereço</label>
                 <input type="text" id="endereco" placeholder="Rua, Avenida...">
             </div>
             <div class="address-group">
                 <div class="input-group">
-                    <label class="required">Número</label>
+                    <label class="required" for="numero">Número</label>
                     <input type="text" id="numero" placeholder="Nº">
                 </div>
                 <div class="input-group">
-                    <label>Complemento</label>
+                    <label for="complemento">Complemento</label>
                     <input type="text" id="complemento" placeholder="Apt, Sala...">
                 </div>
             </div>
             <div class="address-group">
                 <div class="input-group">
-                    <label class="required">Bairro</label>
+                    <label class="required" for="bairro">Bairro</label>
                     <input type="text" id="bairro" placeholder="Bairro">
                 </div>
                 <div class="input-group">
-                    <label class="required">Cidade</label>
+                    <label class="required" for="cidade">Cidade</label>
                     <input type="text" id="cidade" placeholder="Cidade">
                 </div>
             </div>
             <div class="input-group">
-                <label class="required">Estado</label>
+                <label class="required" for="estado">Estado</label>
                 <input type="text" id="estado" placeholder="UF" maxlength="2">
             </div>
             <div class="input-group">
-                <label>Telefone</label>
+                <label for="telefone">Telefone</label>
                 <input type="text" id="telefone" placeholder="(00) 00000-0000" maxlength="15">
             </div>
         </div>
 
-        <!-- Produtos -->
-        <div class="section">
+        <!-- Produtos da NFA -->
+        <div class="section" id="secao-produtos">
             <div class="section-title">Produtos</div>
             <div id="produtos">
                 <div class="produto-item">
@@ -409,6 +418,19 @@
             <button type="button" class="btn btn-success" onclick="adicionarProduto()">+ Adicionar Produto</button>
         </div>
 
+        <!-- Descrição única da NFS -->
+        <div class="section hidden" id="secao-servico">
+            <div class="section-title">Dados do Serviço</div>
+            <div class="input-group">
+                <label for="descricao-servico" class="required">Descrição do serviço</label>
+                <textarea id="descricao-servico" rows="6" placeholder="Descreva o serviço prestado em um único texto" aria-required="true"></textarea>
+            </div>
+            <div class="input-group">
+                <label for="valor-servico" class="required">Valor do serviço (R$)</label>
+                <input type="text" id="valor-servico" inputmode="numeric" placeholder="0,00" aria-required="true">
+            </div>
+        </div>
+
         <!-- Total -->
         <div class="total-display">
             <div class="label">Total da Nota</div>
@@ -418,7 +440,7 @@
         <!-- Pagamento -->
         <div class="section">
             <div class="input-group">
-                <label class="required">Forma de Pagamento</label>
+                <label class="required" for="pagamento">Forma de Pagamento</label>
                 <select id="pagamento">
                     <option value="">Selecione...</option>
                     <option value="DINHEIRO">💵 Dinheiro</option>
@@ -435,6 +457,7 @@
         <button type="button" class="btn btn-whatsapp" onclick="enviarWhatsApp()">
             📱 Enviar Pedido via WhatsApp
         </button>
+        </div>
     </div>
 </div>
 
@@ -451,22 +474,32 @@ const produtosDisponiveis = [
     "RAPADURA LEITE NINHO"
 ];
 
+let tipoNota = null;
 let tipoCliente = 'cnpj';
 
-// Seletor de tipo
+function selecionarNota(tipo) {
+    tipoNota = tipo;
+    document.querySelectorAll('[data-nota]').forEach(btn => {
+        const ativo = btn.dataset.nota === tipo;
+        btn.classList.toggle('active', ativo);
+        btn.setAttribute('aria-pressed', String(ativo));
+    });
+    document.getElementById('dados-nota').classList.remove('hidden');
+    document.getElementById('secao-produtos').classList.toggle('hidden', tipo === 'nfs');
+    document.getElementById('secao-servico').classList.toggle('hidden', tipo !== 'nfs');
+    document.getElementById('titulo-cliente').textContent = tipo === 'nfs' ? 'Dados do Tomador' : 'Tipo de Cliente';
+    recalcularTotal();
+}
+
 function selecionarTipo(tipo) {
     tipoCliente = tipo;
-    const btns = document.querySelectorAll('.toggle-btn');
-    btns.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    if (tipo === 'cnpj') {
-        document.getElementById('dados-cnpj').classList.remove('hidden');
-        document.getElementById('dados-cpf').classList.add('hidden');
-    } else {
-        document.getElementById('dados-cnpj').classList.add('hidden');
-        document.getElementById('dados-cpf').classList.remove('hidden');
-    }
+    document.querySelectorAll('[data-cliente]').forEach(btn => {
+        const ativo = btn.dataset.cliente === tipo;
+        btn.classList.toggle('active', ativo);
+        btn.setAttribute('aria-pressed', String(ativo));
+    });
+    document.getElementById('dados-cnpj').classList.toggle('hidden', tipo !== 'cnpj');
+    document.getElementById('dados-cpf').classList.toggle('hidden', tipo !== 'cpf');
 }
 
 // Formatação de campos
@@ -507,10 +540,20 @@ function formatarTelefone(valor) {
 
 function formatarMoeda(valor) {
     valor = valor.replace(/\D/g, '');
-    valor = (parseInt(valor) / 100).toFixed(2);
+    if (!valor) return '';
+    valor = (Number(valor) / 100).toFixed(2);
     valor = valor.replace('.', ',');
     return valor;
 }
+
+function lerValor(valor) {
+    return Number(valor.replace(/\./g, '').replace(',', '.'));
+}
+
+document.getElementById('valor-servico').addEventListener('input', function() {
+    this.value = formatarMoeda(this.value);
+    recalcularTotal();
+});
 
 // Event listeners de formatação
 document.getElementById('cnpj').addEventListener('input', function(e) {
@@ -739,6 +782,11 @@ function removerProduto(btn) {
 }
 
 function recalcularTotal() {
+    if (tipoNota === 'nfs') {
+        const total = lerValor(document.getElementById('valor-servico').value) || 0;
+        document.getElementById('total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        return;
+    }
     let total = 0;
     document.querySelectorAll('.produto-item').forEach(item => {
         const qtd = parseFloat(item.querySelector('input[name="quantidade"]').value) || 0;
@@ -750,6 +798,11 @@ function recalcularTotal() {
 
 // Enviar WhatsApp
 function enviarWhatsApp() {
+    if (!tipoNota) {
+        alert('Selecione o tipo de nota: NFA ou NFS!');
+        return;
+    }
+    const tituloDados = tipoNota === 'nfs' ? 'DADOS DO TOMADOR' : 'DADOS DO COMPRADOR';
     let dados = '';
     let erro = false;
     
@@ -767,7 +820,7 @@ function enviarWhatsApp() {
             return;
         }
         
-        dados = `*DADOS DO COMPRADOR:*\nEmpresa: ${razao.toUpperCase()}\nCNPJ: ${cnpj}\n`;
+        dados = `*${tituloDados}:*\nEmpresa: ${razao.toUpperCase()}\nCNPJ: ${cnpj}\n`;
     } else {
         const cpf = document.getElementById('cpf').value;
         const nome = document.getElementById('nome-completo').value.trim();
@@ -790,7 +843,7 @@ function enviarWhatsApp() {
             return;
         }
         
-        dados = `*DADOS DO COMPRADOR:*\nNome: ${nome.toUpperCase()}\nCPF: ${cpf}\n`;
+        dados = `*${tituloDados}:*\nNome: ${nome.toUpperCase()}\nCPF: ${cpf}\n`;
         dados += `Endereço: ${endereco.toUpperCase()}, ${numero}`;
         if (complemento) dados += ` - ${complemento.toUpperCase()}`;
         dados += `\nBairro: ${bairro.toUpperCase()}\nCidade: ${cidade.toUpperCase()}/${estado.toUpperCase()}\nCEP: ${cep}\n`;
@@ -803,32 +856,47 @@ function enviarWhatsApp() {
         return;
     }
     
-    let produtos = '';
+    let conteudo = '';
     let total = 0;
-    
-    document.querySelectorAll('.produto-item').forEach(item => {
-        const qtd = parseFloat(item.querySelector('input[name="quantidade"]').value) || 0;
-        const desc = item.querySelector('input[name="descricao"]').value.trim();
-        const valor = parseFloat(item.querySelector('input[name="valor"]').value.replace(',', '.')) || 0;
-        
-        if (!desc || qtd <= 0 || valor <= 0) {
-            erro = true;
+
+    if (tipoNota === 'nfs') {
+        const descricao = document.getElementById('descricao-servico').value.trim();
+        total = lerValor(document.getElementById('valor-servico').value);
+        if (!descricao) {
+            alert('Preencha a descrição do serviço!');
+            document.getElementById('descricao-servico').focus();
+            return;
         }
-        
-        total += qtd * valor;
-        produtos += `${qtd} | ${desc.toUpperCase()} | R$ ${valor.toFixed(2).replace('.', ',')}\n`;
-    });
-    
-    if (erro) {
-        alert('Preencha todos os produtos corretamente!');
-        return;
+        if (!Number.isFinite(total) || total <= 0) {
+            alert('Informe um valor do serviço maior que zero!');
+            document.getElementById('valor-servico').focus();
+            return;
+        }
+        conteudo = `*DESCRIÇÃO DO SERVIÇO:*\n${descricao}\n`;
+    } else {
+        let produtos = '';
+        document.querySelectorAll('.produto-item').forEach(item => {
+            const qtd = Number(item.querySelector('input[name="quantidade"]').value);
+            const desc = item.querySelector('input[name="descricao"]').value.trim();
+            const valor = lerValor(item.querySelector('input[name="valor"]').value);
+            if (!desc || !Number.isFinite(qtd) || !Number.isFinite(valor) || qtd <= 0 || valor <= 0) {
+                erro = true;
+            }
+            total += qtd * valor;
+            produtos += `${qtd} | ${desc.toUpperCase()} | R$ ${valor.toFixed(2).replace('.', ',')}\n`;
+        });
+        if (erro || !Number.isFinite(total)) {
+            alert('Preencha todos os produtos corretamente!');
+            return;
+        }
+        conteudo = `*LISTA DE PRODUTOS:*\n${produtos}`;
     }
-    
-    const mensagem = `${dados}\n*LISTA DE PRODUTOS:*\n${produtos}\n*TOTAL DA NOTA:* R$ ${total.toFixed(2).replace('.', ',')}\n*FORMA DE PAGAMENTO:* ${pagamento}`;
-    
+
+    const mensagem = `*PEDIDO DE ${tipoNota.toUpperCase()}*\n\n${dados}\n${conteudo}\n*TOTAL DA NOTA:* R$ ${total.toFixed(2).replace('.', ',')}\n*FORMA DE PAGAMENTO:* ${pagamento}`;
+
     const numeroWhatsApp = '5555996636737';
     const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 // Inicializar
